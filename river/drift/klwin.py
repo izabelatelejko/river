@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import collections
 import itertools
+import math
 import random
 import typing
-import math
 
 from river.base import DriftDetector
 
@@ -121,14 +123,14 @@ class KLWIN(DriftDetector):
             )
 
             if psi_value > self.alpha:
-                self.drift_detected = True
+                self._drift_detected = True
                 self.window = collections.deque(most_recent, maxlen=self.window_size)
             else:
-                self.drift_detected = False
+                self._drift_detected = False
         else:
-            self.drift_detected = False
+            self._drift_detected = False
 
-    def _kl_distance(self, p: typing.List[float], q: typing.List[float]) -> float:
+    def _kl_distance(self, p: list[float], q: list[float]) -> float:
         """Calculate the Kullback-Leibler divergence between two distributions.
 
         Parameters
