@@ -114,10 +114,19 @@ class KLWIN(DriftDetector):
             most_recent = list(
                 itertools.islice(self.window, self.window_size - self.stat_size, self.window_size)
             )
-            psi_value = self._kl_distance(most_recent, rnd_window) + self._kl_distance(
-                rnd_window, most_recent
-            )
+            mean_window = []
+            for i in range(len(most_recent)):
+                chance = random.random()
+                if chance > 0.5:
+                    mean_window.append(most_recent[i])
+                else:
+                    mean_window.append(rnd_window[i])
 
+            psi_value = (
+                0.5 * self._kl_distance(most_recent, mean_window) +
+                  0.5 * self._kl_distance(rnd_window, mean_window)
+            )
+            print(psi_value)
             if psi_value > self.alpha:
                 self._drift_detected = True
                 self.window = collections.deque(most_recent, maxlen=self.window_size)
@@ -142,4 +151,4 @@ class KLWIN(DriftDetector):
             Kullback-Leibler divergence.
 
         """
-        return sum(p[i] * (math.log(p[i] / q[i]) if q[i] > 0 else 0) for i in range(len(p)))
+        return sum(p[i] * (math.log(p[i] / q[i]) if (q[i] > 0 and p[i] > 0) else 0) for i in range(len(p)))
