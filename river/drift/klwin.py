@@ -109,14 +109,10 @@ class KLWIN(DriftDetector):
         if len(self.window) >= self.window_size:
             rnd_window = [
                 self.window[r]
-                for r in self._rng.sample(
-                    range(self.window_size - self.stat_size), self.stat_size
-                )
+                for r in self._rng.sample(range(self.window_size - self.stat_size), self.stat_size)
             ]
             most_recent = list(
-                itertools.islice(
-                    self.window, self.window_size - self.stat_size, self.window_size
-                )
+                itertools.islice(self.window, self.window_size - self.stat_size, self.window_size)
             )
             psi_value = self._kl_distance(most_recent, rnd_window) + self._kl_distance(
                 rnd_window, most_recent
@@ -146,6 +142,4 @@ class KLWIN(DriftDetector):
             Kullback-Leibler divergence.
 
         """
-        return sum(
-            p[i] * (math.log(p[i] / q[i]) if q[i] > 0 else 0) for i in range(len(p))
-        )
+        return sum(p[i] * (math.log(p[i] / q[i]) if q[i] > 0 else 0) for i in range(len(p)))
