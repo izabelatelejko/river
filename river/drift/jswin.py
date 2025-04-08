@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import collections
 import itertools
-import numpy as np
 import random
 import typing
+
+import numpy as np
 
 from river.base import DriftDetector
 
@@ -82,7 +83,7 @@ class JSWIN(DriftDetector):
         self.window_size = window_size
         self.bin_size = bin_size
         self.seed = seed
-        self._js_value = None
+        self._js_value: float | None = None
 
         self._reset()
 
