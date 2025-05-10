@@ -1,12 +1,12 @@
 """Model with drift detector."""
+from __future__ import annotations
 
-from river import metrics, preprocessing
-
-from typing import Any, Optional
 from collections import deque
+from typing import Any, Optional
 
 import numpy as np
 
+from river import metrics, preprocessing
 from utils.const import DriftType
 
 

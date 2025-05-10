@@ -1,7 +1,9 @@
 """Parameter configuration for drift detectors."""
+from __future__ import annotations
+
+from typing import List
 
 from pydantic import BaseModel
-from typing import List
 
 
 class JSWINParams(BaseModel):

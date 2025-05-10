@@ -1,14 +1,14 @@
 """Module with dataset utilities for generating and plotting data streams."""
-
-from typing import List, Optional
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import List, Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
-from river import stream, datasets
+from river import datasets, stream
 
 
 class DataStream(ABC):

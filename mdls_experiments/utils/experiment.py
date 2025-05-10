@@ -1,17 +1,17 @@
 """Experiment class to evaluate drift detection methods."""
-
-from typing import Any, Optional, List
+from __future__ import annotations
 
 import random
+from typing import Any, List, Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from utils.const import DRIFT_DETECTORS, DriftType
 from utils.drift_detectors_bundle import DriftDetectorsBundle
 from utils.model_with_drift_detector import ModelWithDriftDetector
-from utils.parameter_config import DriftDetectorsParamGrid, DriftDetectorsParamConfig
+from utils.parameter_config import DriftDetectorsParamConfig, DriftDetectorsParamGrid
 
 
 class Experiment:

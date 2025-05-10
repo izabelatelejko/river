@@ -1,12 +1,12 @@
 """Drift detectors bundle of different methods."""
-
-from river import drift
+from __future__ import annotations
 
 from typing import Any, Optional
 
+from river import drift
 from utils.const import DriftType
-from utils.parameter_config import DriftDetectorsParamConfig
 from utils.model_with_drift_detector import ModelWithDriftDetector
+from utils.parameter_config import DriftDetectorsParamConfig
 
 
 class DriftDetectorsBundle:
