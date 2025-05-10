@@ -36,12 +36,8 @@ class Experiment:
         self.data_stream = data_stream
         self.detectors_params_grid = drift_detectors_params_grid
 
-        self.error_detectors_params = self._find_optimal_detectors_params(
-            DriftType.ERROR
-        )
-        self.concept_detectors_params = self._find_optimal_detectors_params(
-            DriftType.CONCEPT
-        )
+        self.error_detectors_params = self._find_optimal_detectors_params(DriftType.ERROR)
+        self.concept_detectors_params = self._find_optimal_detectors_params(DriftType.CONCEPT)
 
         self.error_detectors = DriftDetectorsBundle(
             window_size=window_size,
@@ -59,9 +55,7 @@ class Experiment:
             window_size, model_instance, DriftType.NO_DRIFT, None
         )
 
-    def _find_optimal_detectors_params(
-        self, drift_type: DriftType
-    ) -> DriftDetectorsParamConfig:
+    def _find_optimal_detectors_params(self, drift_type: DriftType) -> DriftDetectorsParamConfig:
         """Find the optimal parameters for the drift detectors."""
         print(f"Finding optimal parameters for {drift_type.name.lower()} detectors")
         detectors_params = {}
@@ -83,9 +77,9 @@ class Experiment:
                 params_acc.append(model_with_detector.get_average_accuracy())
 
             best_param_id = np.argmax(np.array(params_acc))
-            detectors_params[drift_detector_name] = self.detectors_params_grid[
-                drift_detector_name
-            ][best_param_id]
+            detectors_params[drift_detector_name] = self.detectors_params_grid[drift_detector_name][
+                best_param_id
+            ]
 
         return DriftDetectorsParamConfig(**detectors_params)
 
@@ -98,12 +92,8 @@ class Experiment:
         """Run the experiment on the data stream."""
         for i, (x, y) in enumerate(self.data_stream.get_data_stream()):
             for detector_name in DRIFT_DETECTORS.keys():
-                self.error_detectors[detector_name].run_iteration(
-                    i, x, y, self.drift_col_id
-                )
-                self.concept_detectors[detector_name].run_iteration(
-                    i, x, y, self.drift_col_id
-                )
+                self.error_detectors[detector_name].run_iteration(i, x, y, self.drift_col_id)
+                self.concept_detectors[detector_name].run_iteration(i, x, y, self.drift_col_id)
 
             self.no_drift.run_iteration(i, x, y, self.drift_col_id)
 
@@ -114,9 +104,7 @@ class Experiment:
         for detector_name in DRIFT_DETECTORS.keys():
             row = {
                 "drift_type": DriftType.CONCEPT.name,
-                "avg_accuracy": self.concept_detectors[
-                    detector_name
-                ].get_average_accuracy(),
+                "avg_accuracy": self.concept_detectors[detector_name].get_average_accuracy(),
                 "detector_name": detector_name,
             }
             df = pd.concat([df, pd.DataFrame([row])])
@@ -124,9 +112,7 @@ class Experiment:
         for detector_name in DRIFT_DETECTORS.keys():
             row = {
                 "drift_type": DriftType.ERROR.name,
-                "avg_accuracy": self.error_detectors[
-                    detector_name
-                ].get_average_accuracy(),
+                "avg_accuracy": self.error_detectors[detector_name].get_average_accuracy(),
                 "detector_name": detector_name,
             }
             df = pd.concat([df, pd.DataFrame([row])])
@@ -138,9 +124,7 @@ class Experiment:
         }
         df = pd.concat([df, pd.DataFrame([row])]).reset_index(drop=True)
 
-        return df.pivot(
-            index="drift_type", values="avg_accuracy", columns="detector_name"
-        )
+        return df.pivot(index="drift_type", values="avg_accuracy", columns="detector_name")
 
     def plot(self, plot_only_JSWIN: bool = False) -> None:
         """Plot the results of the experiment."""
@@ -201,9 +185,7 @@ class Experiment:
             for i, detector_name in enumerate(DRIFT_DETECTORS.keys()):
                 if use_accs:
                     vals = detectors[detector_name].accs
-                ax[i % 2, i // 2].scatter(
-                    [i for i in range(len(vals))], vals, s=1, color="skyblue"
-                )
+                ax[i % 2, i // 2].scatter([i for i in range(len(vals))], vals, s=1, color="skyblue")
                 first = True
                 for drift_x in detectors[detector_name].drifts:
                     if first:

@@ -57,17 +57,13 @@ class DriftDetectorsBundle:
             window_size,
             model_instance,
             drift_type,
-            drift.binary.HDDM_A(
-                drift_confidence=self.detectors_params.HDDM_A.drift_confidence
-            ),
+            drift.binary.HDDM_A(drift_confidence=self.detectors_params.HDDM_A.drift_confidence),
         )
         self.hddm_w = ModelWithDriftDetector(
             window_size,
             model_instance,
             drift_type,
-            drift.binary.HDDM_W(
-                drift_confidence=self.detectors_params.HDDM_W.drift_confidence
-            ),
+            drift.binary.HDDM_W(drift_confidence=self.detectors_params.HDDM_W.drift_confidence),
         )
         self.ph = ModelWithDriftDetector(
             window_size,

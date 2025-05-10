@@ -75,9 +75,7 @@ class LabelShiftDataStream(DataStream):
     def plot_stream(self) -> None:
         """Plot the data stream."""
         colormap = np.array(["red", "blue"])
-        plt.scatter(
-            [i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y]
-        )
+        plt.scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
         plt.title("Virtual Drift (Label Shift)")
         plt.show()
 
@@ -120,13 +118,9 @@ class HyperplaneStream(DataStream):
         """Plot the data stream."""
         colormap = np.array(["red", "blue"])
         fig, ax = plt.subplots(1, 2, figsize=[10, 5])
-        ax[0].scatter(
-            [i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y]
-        )
+        ax[0].scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
         ax[0].set_title("Feature 0")
-        ax[1].scatter(
-            [i for i in range(len(self.X[1]))], self.X[1], s=1, color=colormap[self.y]
-        )
+        ax[1].scatter([i for i in range(len(self.X[1]))], self.X[1], s=1, color=colormap[self.y])
         ax[1].set_title("Feature 1")
         plt.show()
 
@@ -172,8 +166,6 @@ class SyntheticDataStream(DataStream):
     def plot_stream(self) -> None:
         """Plot the data stream."""
         colormap = np.array(["red", "blue"])
-        plt.scatter(
-            [i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y]
-        )
+        plt.scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
         plt.title("Artificial Dataset")
         plt.show()
