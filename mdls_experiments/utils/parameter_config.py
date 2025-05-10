@@ -99,8 +99,8 @@ class DriftDetectorsParamConfig(BaseModel):
     JSWIN: JSWINParams
     ADWIN: ADWINParams
     KSWIN: KSWINParams
-    HDDM_A: HDDMAParams
-    HDDM_W: HDDMWParams
+    # HDDM_A: HDDMAParams
+    # HDDM_W: HDDMWParams
     PH: PHParams
 
     def __getitem__(self, item):
@@ -111,10 +111,10 @@ class DriftDetectorsParamConfig(BaseModel):
             return self.ADWIN
         elif item == "KSWIN":
             return self.KSWIN
-        elif item == "HDDM_A":
-            return self.HDDM_A
-        elif item == "HDDM_W":
-            return self.HDDM_W
+        # elif item == "HDDM_A":
+        #     return self.HDDM_A
+        # elif item == "HDDM_W":
+        #     return self.HDDM_W
         elif item == "PH":
             return self.PH
         else:

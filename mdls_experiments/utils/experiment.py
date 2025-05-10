@@ -178,7 +178,7 @@ class Experiment:
         )
 
         if not plot_only_JSWIN:
-            fig, ax = plt.subplots(2, 3, sharey=True)
+            fig, ax = plt.subplots(2, 2, sharey=True)
             fig.set_figheight(10)
             fig.set_figwidth(15)
 
@@ -208,7 +208,7 @@ class Experiment:
                 ax[i % 2, i // 2].set_xlabel(xlabel)
                 ax[i % 2, i // 2].set_ylabel(ylabel)
 
-            fig.legend(loc="center right", fontsize=12, bbox_to_anchor=(1.10, 0.5))
+            # fig.legend(loc="center right", fontsize=12, bbox_to_anchor=(1.10, 0.5))
             plt.suptitle(title, fontsize=16)
             fig.tight_layout()
             plt.show()

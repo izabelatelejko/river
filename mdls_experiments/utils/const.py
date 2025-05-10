@@ -9,8 +9,8 @@ DRIFT_DETECTORS = {
     "JSWIN": drift.JSWIN,
     "ADWIN": drift.ADWIN,
     "KSWIN": drift.KSWIN,
-    "HDDM_A": drift.binary.HDDM_A,
-    "HDDM_W": drift.binary.HDDM_W,
+    # "HDDM_A": drift.binary.HDDM_A,
+    # "HDDM_W": drift.binary.HDDM_W,
     "PH": drift.PageHinkley,
 }
 

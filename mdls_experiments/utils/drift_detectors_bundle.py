@@ -19,8 +19,8 @@ class DriftDetectorsBundle:
         "ADWIN": "red",
         "KSWIN": "green",
         "PH": "orange",
-        "HDDM_A": "blue",
-        "HDDM_W": "purple",
+        # "HDDM_A": "blue",
+        # "HDDM_W": "purple",
     }
 
     def __init__(
@@ -53,18 +53,18 @@ class DriftDetectorsBundle:
             drift_type,
             drift.KSWIN(alpha=self.detectors_params.KSWIN.alpha, seed=42),
         )
-        self.hddm_a = ModelWithDriftDetector(
-            window_size,
-            model_instance,
-            drift_type,
-            drift.binary.HDDM_A(drift_confidence=self.detectors_params.HDDM_A.drift_confidence),
-        )
-        self.hddm_w = ModelWithDriftDetector(
-            window_size,
-            model_instance,
-            drift_type,
-            drift.binary.HDDM_W(drift_confidence=self.detectors_params.HDDM_W.drift_confidence),
-        )
+        # self.hddm_a = ModelWithDriftDetector(
+        #     window_size,
+        #     model_instance,
+        #     drift_type,
+        #     drift.binary.HDDM_A(drift_confidence=self.detectors_params.HDDM_A.drift_confidence),
+        # )
+        # self.hddm_w = ModelWithDriftDetector(
+        #     window_size,
+        #     model_instance,
+        #     drift_type,
+        #     drift.binary.HDDM_W(drift_confidence=self.detectors_params.HDDM_W.drift_confidence),
+        # )
         self.ph = ModelWithDriftDetector(
             window_size,
             model_instance,
@@ -83,10 +83,10 @@ class DriftDetectorsBundle:
             return self.adwin
         elif item == "KSWIN":
             return self.kswin
-        elif item == "HDDM_A":
-            return self.hddm_a
-        elif item == "HDDM_W":
-            return self.hddm_w
+        # elif item == "HDDM_A":
+        #     return self.hddm_a
+        # elif item == "HDDM_W":
+        #     return self.hddm_w
         elif item == "PH":
             return self.ph
         else:
