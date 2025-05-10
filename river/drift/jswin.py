@@ -152,7 +152,7 @@ class JSWIN(DriftDetector):
         return np.sum(
             np.where(
                 (p_hist != 0) & (q_hist != 0),
-                p_hist * np.log(p_hist / (q_hist + EPS)) - p_hist + q_hist,
+                p_hist * np.log(p_hist / (q_hist + EPS)), #- p_hist + q_hist,
                 0,
             )
         )
