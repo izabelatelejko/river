@@ -5,12 +5,24 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from river import drift
+
 from utils import (
     ModelWithDriftDetector, 
     DriftDetorsBundle, 
-    DriftType
+    DriftType,
+    DriftDetectorsParamGrid,
+    DriftDetectorsParamConfig
 )
 
+DRIFTS = {
+    "JSWIN": drift.JSWIN,
+    "ADWIN": drift.ADWIN,
+    "KSWIN": drift.KSWIN,
+    "HDDM_A": drift.binary.HDDM_A,
+    "HDDM_W": drift.binary.HDDM_W,
+    "PH": drift.PageHinkley
+}
 
 class Experiment():
     """
@@ -24,7 +36,8 @@ class Experiment():
             data_stream: Any,
             window_size: int,
             drift_col_id: int,
-            seed: int = 123
+            seed: int = 123,
+            drift_detectors_params_grid:DriftDetectorsParamGrid = DriftDetectorsParamGrid()
         ):
 
         np.random.seed(seed)
@@ -36,21 +49,84 @@ class Experiment():
         self.drift_col_id = drift_col_id
         self.data_stream = data_stream
 
-        self.error_detectors = DriftDetorsBundle(window_size=window_size, model_instance=model_instance, drift_type=DriftType.ERROR)
-        self.concept_detectors = DriftDetorsBundle(window_size=window_size, model_instance=model_instance, drift_type=DriftType.CONCEPT)
+        self.detectors_params_grid = drift_detectors_params_grid
+        
+        self.error_detectors_params = self._find_optimal_detectors_params(DriftType.ERROR)
+        self.concept_detectors_params = self._find_optimal_detectors_params(DriftType.CONCEPT)
+
+        self.error_detectors = DriftDetorsBundle(window_size=window_size, model_instance=model_instance, drift_type=DriftType.ERROR, detectors_params=self.error_detectors_params)
+        self.concept_detectors = DriftDetorsBundle(window_size=window_size, model_instance=model_instance, drift_type=DriftType.CONCEPT, detectors_params=self.concept_detectors_params)
         self.no_drift = ModelWithDriftDetector(window_size, model_instance, DriftType.NO_DRIFT, None)
 
 
+    def _find_optimal_detectors_params(self, drift_type:DriftType) -> DriftDetectorsParamConfig:
+        print(f"Finding optimal parameters for {drift_type.name.lower()} detectors")
+        detectors_params = {}
+        for drift_detector_name, drift_detector_instance in DRIFTS.items():
+            params_acc = []
+            for drift_detector_param in self.detectors_params_grid[drift_detector_name]:
+                print(f"Processing detector {drift_detector_name} with params {str(drift_detector_param)}")
+                curr_data_stream = self.data_stream.get_data_stream()
+                model_with_detector = ModelWithDriftDetector(
+                    self.window_size,
+                    self.model_instance,
+                    drift_type,
+                    drift_detector_instance(
+                        **drift_detector_param.model_dump()
+                    )
+                )
+                for i, (x, y) in enumerate(curr_data_stream):
+                    model_with_detector.run_iteration(i, x, y, self.drift_col_id)
+                params_acc.append(model_with_detector.get_average_accuracy())
+            
+            best_param_id = np.argmax(np.array(params_acc))
+            detectors_params[drift_detector_name] = self.detectors_params_grid[drift_detector_name][best_param_id]
+        
+        return DriftDetectorsParamConfig(**detectors_params)
+    
+    def print_parameters(self):
+        print(str(self.error_detectors_params))
+        print(str(self.concept_detectors_params))
+
     def run(self):
         """Run the experiment on the data stream."""
-        for i, (x, y) in enumerate(self.data_stream):
+        for i, (x, y) in enumerate(self.data_stream.get_data_stream()):
             for detector_name in DriftDetorsBundle.DRIFTS:
                 self.error_detectors[detector_name].run_iteration(i, x, y, self.drift_col_id)
                 self.concept_detectors[detector_name].run_iteration(i, x, y, self.drift_col_id)
 
             self.no_drift.run_iteration(i, x, y, self.drift_col_id)
 
-    def plot(self, x: Any, plot_only_JSWIN: bool = False):
+    def get_average_accs(self):
+        df = pd.DataFrame([],  columns =  ["drift_type", "avg_accuracy", "detector_name"])
+
+        for detector_name in DriftDetorsBundle.DRIFTS:
+            row = {
+                "drift_type": DriftType.CONCEPT.name,
+                "avg_accuracy": self.concept_detectors[detector_name].get_average_accuracy(),
+                "detector_name": detector_name
+            }
+            df = pd.concat([df, pd.DataFrame([row])])
+
+        for detector_name in DriftDetorsBundle.DRIFTS:
+            row = {
+                "drift_type": DriftType.ERROR.name,
+                "avg_accuracy": self.error_detectors[detector_name].get_average_accuracy(),
+                "detector_name": detector_name
+            }
+            df = pd.concat([df, pd.DataFrame([row])])
+        
+        row = {
+            "drift_type": DriftType.NO_DRIFT.name,
+            "avg_accuracy":self.no_drift.get_average_accuracy(),
+            "detector_name": "No Detector"
+        }
+        df = pd.concat([df, pd.DataFrame([row])]).reset_index(drop=True)
+        
+        return df.pivot(index="drift_type", values="avg_accuracy", columns="detector_name")
+        
+
+    def plot(self, plot_only_JSWIN: bool = False):
         """Plot the results of the experiment."""
         if not plot_only_JSWIN:
             plt.scatter([i for i in range(len(self.no_drift.accs))], self.no_drift.accs, s=1, color="skyblue")
@@ -61,20 +137,20 @@ class Experiment():
 
         self._plot_detectors(self.error_detectors, 'Error Drift Detection', "Model Accuracy", plot_only_JSWIN)
         self._plot_detectors(self.concept_detectors, 'Concept Drift Detection', "Model Accuracy", plot_only_JSWIN)
-        self._plot_detectors(self.concept_detectors, 'Concept Drift Detection', f"Concept({self.drift_col_id})", plot_only_JSWIN, x[0])
+        self._plot_detectors(self.concept_detectors, 'Concept Drift Detection', f"Concept({self.drift_col_id})", plot_only_JSWIN, self.data_stream.X[0])
 
     def _plot_detectors(self, detectors: Any, title: str, ylabel: str, plot_only_JSWIN: bool = False, vals: Optional[List[float]] = None):
         """Plot the results of drift detectors."""
-
         use_accs = True if vals is None else False
         xlabel = "Time Steps"
+        detector_params = self.concept_detectors_params if "concept" in title.lower() else self.error_detectors_params
 
         if not plot_only_JSWIN:
             fig, ax = plt.subplots(2, 3, sharey=True)
             fig.set_figheight(10)
             fig.set_figwidth(15)
 
-            for i, detector_name in enumerate(DriftDetorsBundle.DRIFTS):
+            for i, detector_name in enumerate(DRIFTS.keys()):
                 if use_accs:
                     vals = detectors[detector_name].accs
                 ax[i % 2, i // 2].scatter([i for i in range(len(vals))], vals, s=1, color="skyblue")
@@ -84,7 +160,7 @@ class Experiment():
                         ax[i % 2, i // 2].axvline(x=drift_x, color=DriftDetorsBundle.COLORS[detector_name], linestyle='--', label=detector_name)
                         first = False
                     ax[i % 2, i // 2].axvline(x=drift_x, linestyle='--', color=DriftDetorsBundle.COLORS[detector_name])
-                ax[i % 2, i // 2].set_title(detector_name, fontsize=12)
+                ax[i % 2, i // 2].set_title(f"{detector_name} ({str(detector_params[detector_name])})", fontsize=12)
                 ax[i % 2, i // 2].set_xlabel(xlabel)
                 ax[i % 2, i // 2].set_ylabel(ylabel)
 

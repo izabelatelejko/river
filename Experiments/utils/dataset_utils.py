@@ -13,7 +13,11 @@ class DataStream(ABC):
     def __init__(self):
         self.X = None
         self.y = None
-        self._data_stream = self.initialize_stream()
+
+        self.initialize_stream()
+        
+    def get_data_stream(self):
+        return stream.iter_pandas(self.X, self.y)
     
     @abstractmethod
     def initialize_stream(self):
@@ -22,9 +26,6 @@ class DataStream(ABC):
     @abstractmethod
     def plot_stream(self):
         pass
-        
-    def data_stream(self):
-        return self._data_stream
     
 
 class LabelShiftDataStream(DataStream):
@@ -35,7 +36,7 @@ class LabelShiftDataStream(DataStream):
         
         super().__init__()
 
-    def initialize_stream(self):
+    def initialize_stream(self) -> None:
         for r in self.ratios:
             n1 = int(self.n * r) // len(self.ratios)
             n2 = self.n // len(self.ratios) - n1
@@ -62,8 +63,6 @@ class LabelShiftDataStream(DataStream):
                 self.X = pd.concat([self.X, X_r])
                 self.y = pd.concat([self.y, y_r])
 
-        return stream.iter_pandas(self.X, self.y)
-
     def plot_stream(self):
         colormap = np.array(['red', 'blue'])
         plt.scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
@@ -86,7 +85,7 @@ class HyperPlaneStream(DataStream):
         
         super().__init__()
     
-    def initialize_stream(self):
+    def initialize_stream(self) -> None:
         gen = datasets.synth.Hyperplane(
             seed=self.seed,
             n_drift_features=self.n_drift_features,
@@ -101,14 +100,14 @@ class HyperPlaneStream(DataStream):
             self.y.append(_y)
         self.X = pd.DataFrame(self.X)
         self.y = pd.Series(self.y)
-
-        return stream.iter_pandas(self.X, self.y)
     
     def plot_stream(self):
         colormap = np.array(['red', 'blue'])
-        plt.scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
-        plt.show()
-        plt.scatter([i for i in range(len(self.X[1]))], self.X[1], s=1, color=colormap[self.y])
+        fig, ax = plt.subplots(1, 2, figsize=[10, 5])
+        ax[0].scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
+        ax[0].set_title("Feature 0")
+        ax[1].scatter([i for i in range(len(self.X[1]))], self.X[1], s=1, color=colormap[self.y])
+        ax[1].set_title("Feature 1")
         plt.show()
 
 class ArtificialDataStream(DataStream):
@@ -120,8 +119,8 @@ class ArtificialDataStream(DataStream):
         
         super().__init__()
 
-    def initialize_stream(self):
-        for id in range(1, len(self.distribution_types)):
+    def initialize_stream(self) -> None:
+        for id in range(len(self.distribution_types)):
             n = self.samples_lens[id] // 2
             X_pos = self.distribution_types[id](*self.pos_distribution_params[id], n)
             X_neg = self.distribution_types[id](*self.neg_distribution_params[id], n)
@@ -139,8 +138,9 @@ class ArtificialDataStream(DataStream):
             else:
                 self.X = pd.concat([self.X, X_id])
                 self.y = pd.concat([self.y, y_id])
-
-        return stream.iter_pandas(self.X, self.y)
     
     def plot_stream(self):
-        return super().plot_stream()
+        colormap = np.array(['red', 'blue'])
+        plt.scatter([i for i in range(len(self.X[0]))], self.X[0], s=1, color=colormap[self.y])
+        plt.title('Artificial Dataset')
+        plt.show()

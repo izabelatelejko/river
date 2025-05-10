@@ -5,6 +5,8 @@ from collections import deque
 
 from utils import DriftType
 
+import numpy as np
+
 
 class ModelWithDriftDetector():
     def __init__(self, window_size: int, model_instance: Any, drift_type: DriftType, detector: Optional[Any]):
@@ -18,6 +20,10 @@ class ModelWithDriftDetector():
         self.metric = metrics.ClassificationReport()
         self.model = preprocessing.StandardScaler() | self.model_instance()
         self.sliding_window = deque(maxlen=window_size)
+
+    def get_average_accuracy(self):
+        assert len(self.accs) > 0
+        return np.mean(np.array(self.accs))
 
     def run_iteration(self, i: int, x: Any, y: Any, drift_col_id: Any) -> None:
         """Run one iteration of the model with drift detection."""

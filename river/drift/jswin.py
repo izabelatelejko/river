@@ -89,10 +89,12 @@ class JSWIN(DriftDetector):
 
         if window:
             self.window = collections.deque(window, maxlen=self.window_size)
+        else:
+            self.window = collections.deque(maxlen=self.window_size)
+
 
     def _reset(self):
         super()._reset()
-        self.window = collections.deque(maxlen=self.window_size)
         self._rng = random.Random(self.seed)
 
     def update(self, x: float) -> None:
