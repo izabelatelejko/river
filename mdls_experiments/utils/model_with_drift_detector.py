@@ -26,15 +26,24 @@ class ModelWithDriftDetector:
         self.drift_type = drift_type
         self.detector = detector
         self.drifts = []
-        self.accs = []
+        self.window_accs = []
+        self.proper_classifications = []
         self.metric = metrics.ClassificationReport()
         self.model = preprocessing.StandardScaler() | self.model_instance()
         self.sliding_window = deque(maxlen=window_size)
 
+    def get_windowed_accuracy(self):
+        """Get the accuracy of the model from last window."""
+        proper_len = len(self.proper_classifications)
+        proper_count = np.sum(
+            np.array(
+                self.proper_classifications[max(0, proper_len - self.window_size):]
+            )
+        )
+        return proper_count / self.window_size
+    
     def get_average_accuracy(self):
-        """Get the average accuracy of the model."""
-        assert len(self.accs) > 0
-        return np.mean(np.array(self.accs))
+        return np.mean(np.array(self.window_accs))
 
     def run_iteration(self, i: int, x: Any, y: Any, drift_col_id: Any) -> None:
         """Run one iteration of the model with drift detection."""
@@ -48,8 +57,11 @@ class ModelWithDriftDetector:
     def _test(self, x: Any, y: int, y_pred: Optional[int]) -> None:
         """Test the model on the input data."""
         if y_pred is not None:
-            self.metric.update(y, y_pred)
-        self.accs.append(self.metric._accuracy.get())
+            if y == y_pred:
+                self.proper_classifications.append(1)
+            else:
+                self.proper_classifications.append(0)
+        self.window_accs.append(self.get_windowed_accuracy())
         self.sliding_window.append((x, y))
 
     def _update_drift(self, x: Any, y: int, y_pred: Optional[int] = None) -> None:

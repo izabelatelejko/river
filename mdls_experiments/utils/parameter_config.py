@@ -47,13 +47,13 @@ class DriftDetectorsParamGrid(BaseModel):
     """Grid of parameters to test for each drift detector."""
 
     JSWIN: List[JSWINParams] = [
-        JSWINParams(alpha=alpha) for alpha in [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75]
+        JSWINParams(alpha=alpha) for alpha in [0.4, 0.45, 0.5, 0.55, 0.6]
     ]
     ADWIN: List[ADWINParams] = [
-        ADWINParams(delta=delta) for delta in [0.00001, 0.0001, 0.001, 0.01]
+        ADWINParams(delta=delta) for delta in [0.001, 0.002, 0.005, 0.01]
     ]
     KSWIN: List[KSWINParams] = [
-        KSWINParams(alpha=alpha) for alpha in [0.00001, 0.0001, 0.001, 0.01]
+        KSWINParams(alpha=alpha) for alpha in [0.0001, 0.001, 0.005, 0.01, 0.05]
     ]
     HDDM_A: List[HDDMAParams] = [
         HDDMAParams(drift_confidence=drift_confidence)

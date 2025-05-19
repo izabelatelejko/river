@@ -130,8 +130,8 @@ class Experiment:
         """Plot the results of the experiment."""
         if not plot_only_JSWIN:
             plt.scatter(
-                [i for i in range(len(self.no_drift.accs))],
-                self.no_drift.accs,
+                [i for i in range(len(self.no_drift.window_accs))],
+                self.no_drift.window_accs,
                 s=1,
                 color="skyblue",
             )
@@ -184,7 +184,7 @@ class Experiment:
 
             for i, detector_name in enumerate(DRIFT_DETECTORS.keys()):
                 if use_accs:
-                    vals = detectors[detector_name].accs
+                    vals = detectors[detector_name].window_accs
                 ax[i % 2, i // 2].scatter([i for i in range(len(vals))], vals, s=1, color="skyblue")
                 first = True
                 for drift_x in detectors[detector_name].drifts:
@@ -214,7 +214,7 @@ class Experiment:
             plt.show()
         else:
             if use_accs:
-                vals = detectors["JSWIN"].accs
+                vals = detectors["JSWIN"].window_accs
             plt.scatter([i for i in range(len(vals))], vals, s=1, color="skyblue")
 
             drift_x = detectors["JSWIN"].drifts
