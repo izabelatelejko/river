@@ -5,6 +5,7 @@ from collections import deque
 from typing import Any, Optional
 
 import numpy as np
+import random
 
 from river import metrics, preprocessing
 from utils.const import DriftType
@@ -21,6 +22,8 @@ class ModelWithDriftDetector:
         detector: Optional[Any],
     ):
         """Initialize the pair of model and drift detector."""
+        np.random.seed(100)
+        random.seed(100)
         self.window_size = window_size
         self.model_instance = model_instance
         self.drift_type = drift_type
